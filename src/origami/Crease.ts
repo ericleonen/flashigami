@@ -1,4 +1,3 @@
-import Pair from "./Pair";
 import Vector from "./Vector";
 import Vertex from "./Vertex";
 
