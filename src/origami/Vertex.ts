@@ -17,4 +17,11 @@ export default class Vertex extends Pair {
         super(x, y);
         this.creases = creases ? creases : new Set();
     }
+
+    /**
+     * Returns the unique key of this vertex
+     */
+    getKey() {
+        return `(${this.x}, ${this.y})`;
+    }
 }

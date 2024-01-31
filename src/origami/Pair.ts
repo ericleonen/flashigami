@@ -34,4 +34,20 @@ export default class Pair {
     equals(other: Pair): boolean {
         return this.getDistance(other) === 0;
     }
+
+    /**
+     * Accepts two Pairs p1 and p2. Returns a positive number if p1 is is "greater" than p2, a
+     * negative number otherwise
+     */
+    static compare(p1: Pair, p2: Pair) {
+        if (p1 === null || p2 === null) {
+            throw new Error("argument(s) are null");
+        }
+
+        if (p1.x === p2.x) {
+            return p1.y - p2.y;
+        } else {
+            return p1.x - p2.x;
+        }
+    }
 }

@@ -1,3 +1,4 @@
+import Pair from "./Pair";
 import Vector from "./Vector";
 import Vertex from "./Vertex";
 
@@ -23,6 +24,10 @@ export default class Crease {
     constructor(vertex1: Vertex, vertex2: Vertex, type?: CreaseType) {
         if (vertex1 === null || vertex2 === null) {
             throw new Error("a vertex is null");
+        }
+
+        if (Pair.compare(vertex1, vertex2)) {
+            [vertex1, vertex2] = [vertex2, vertex1];
         }
 
         this.vertex1 = vertex1;
@@ -84,5 +89,12 @@ export default class Crease {
             this.vertex1.getDistance(vertex) +
             this.vertex2.getDistance(vertex) 
         ) === this.vector.magnitude;
+    }
+
+    /**
+     * Returns the unique key of this crease
+     */
+    getKey() {
+        return `[${this.vertex1.getKey()}, ${this.vertex2.getKey()}]`;
     }
 }
