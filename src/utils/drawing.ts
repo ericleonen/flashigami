@@ -1,24 +1,27 @@
 import Crease from "@/origami/Crease";
+import OrigamiSet from "@/origami/OrigamiSet";
 import Vertex from "@/origami/Vertex";
-import { useEffect } from "react";
+import { DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_FORM_ACTIONS, useEffect, useRef } from "react";
 
 type RenderData = {
-    vertexes?: Set<Vertex>,
-    creases?: Set<Crease>
+    vertexes: OrigamiSet<Vertex>,
+    creases: OrigamiSet<Crease>
 }
 
 export function useRender(
-    data: RenderData,
-    canvas: HTMLCanvasElement | null
+    data: RenderData
 ) {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+
     const { vertexes, creases } = data;
 
     useEffect(() => {
+        const canvas = canvasRef.current;
         const context = canvas && canvas.getContext("2d");
-        
-        const canRender = !!(context && vertexes && creases);
-        if (canRender) render(data, canvas, context);
-    }, [/** add dependencies (probably strings) */]);
+        if (context) render(data, canvas, context);
+    }, [vertexes.toString(), creases.toString()]);
+
+    return canvasRef;
 }
 
 function render(
@@ -29,11 +32,11 @@ function render(
     const { vertexes, creases } = data;
     context.clearRect(0, 0, canvas.width, canvas.height);
 
-    creases!.forEach(crease => {
+    creases.forEach(crease => {
         drawCrease(crease, context);
     });
 
-    vertexes!.forEach(vertex => {
+    vertexes.forEach(vertex => {
         drawVertex(vertex, context);
     });
 }

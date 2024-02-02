@@ -13,28 +13,30 @@ export default class OrigamiSet<T extends Crease | Vertex> {
      */
     constructor(items?: T[]) {
         this.items = {};
-        if (items) items.forEach(this.add);
+        if (items) items.forEach(item => {
+            this.items[item.toString()] = item;
+        });
     }
 
     /**
      * Accepts an item. Adds this item to this set if it wasn't there, otherwise does nothing
      */
     add(item: T) {
-        this.items[item.getKey()] = item;
+        this.items[item.toString()] = item;
     }
 
     /**
      * Accepts an item. Deletes this item from this set if it was there, otherwise does nothing
      */
     delete(item: T) {
-        delete this.items[item.getKey()];
+        delete this.items[item.toString()];
     }
 
     /**
      * Accepts an item. Returns true if this set contains the item
      */
     has(item: T) {
-        return this.items.hasOwnProperty(item.getKey());
+        return this.items.hasOwnProperty(item.toString());
     }
 
     /**
@@ -42,5 +44,29 @@ export default class OrigamiSet<T extends Crease | Vertex> {
      */
     isEmpty() {
         return Object.keys(this.items).length === 0;
+    }
+
+    /**
+     * Accepts a callback function. For each item in this set, applies the callback function
+     */
+    forEach(callback: (value: T) => any) {
+        Object.values(this.items).forEach(callback);
+    }
+
+    /**
+     * Returns the unique String representation of this set
+     */
+    toString() {
+        if (this.isEmpty()) {
+            return "{}";
+        }
+
+        let result = "{";
+
+        Object.keys(this.items)
+            .toSorted()
+            .forEach(key => result += key + ", ")
+
+        return result.substring(0, result.length - 2) + "}";
     }
 }

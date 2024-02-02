@@ -19,9 +19,9 @@ export default class Vertex extends Pair {
     }
 
     /**
-     * Returns the unique key of this vertex
+     * Returns the unique String representation of this vertex
      */
-    getKey() {
+    toString() {
         return `(${this.x}, ${this.y})`;
     }
 }

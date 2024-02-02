@@ -34,6 +34,9 @@ export default class Crease {
         this.vertex2 = vertex2;
         this.vector = new Vector(vertex1, vertex2);
         this.type = type;
+
+        this.vertex1.creases.add(this);
+        this.vertex2.creases.add(this);
     }
 
     /**
@@ -92,9 +95,9 @@ export default class Crease {
     }
 
     /**
-     * Returns the unique key of this crease
+     * Returns the unique String representation of this crease
      */
-    getKey() {
-        return `[${this.vertex1.getKey()}, ${this.vertex2.getKey()}]`;
+    toString() {
+        return `[${this.vertex1.toString()}, ${this.vertex2.toString()}]`;
     }
 }
