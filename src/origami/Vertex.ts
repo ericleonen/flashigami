@@ -1,4 +1,5 @@
 import Crease from "./Crease";
+import OrigamiSet from "./OrigamiSet";
 import Pair from "./Pair";
 
 /**
@@ -6,16 +7,16 @@ import Pair from "./Pair";
  * connected creases and other vertexes
  */
 export default class Vertex extends Pair {
-    creases: Set<Crease>;
+    creases: OrigamiSet<Crease>;
 
     /**
-     * Accepts numbers x and y and an optional Set of Crease creases. Initializes a vertex at
-     * (x, y). Initializes creases as the given Set of Crease creases if given, otherwise as an
-     * empty set
+     * Accepts numbers x and y and an optional OrigamiSet of Crease creases. Initializes a vertex at
+     * (x, y). Initializes creases as the given OrigamiSet of Crease creases if given, otherwise as 
+     * an empty set
      */
-    constructor(x: number, y: number, creases?: Set<Crease>) {
+    constructor(x: number, y: number, creases?: OrigamiSet<Crease>) {
         super(x, y);
-        this.creases = creases ? creases : new Set();
+        this.creases = creases ? creases : new OrigamiSet();
     }
 
     /**

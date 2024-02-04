@@ -25,6 +25,13 @@ export default class OrigamiSet<T extends Crease | Vertex> {
         this.items[item.toString()] = item;
     }
 
+    /** 
+     * Accepts a list of items. Adds each item to the set
+    */
+    addAll(items: T[]) {
+        items.forEach(item => this.add(item));
+    }
+
     /**
      * Accepts an item. Deletes this item from this set if it was there, otherwise does nothing
      */
@@ -32,6 +39,12 @@ export default class OrigamiSet<T extends Crease | Vertex> {
         delete this.items[item.toString()];
     }
 
+    /**
+     * Accepts a list of items. Deletes each item from the set
+     */
+    deleteAll(items: T[]) {
+        items.forEach(item => this.delete(item));
+    }
     /**
      * Accepts an item. Returns true if this set contains the item
      */
@@ -68,5 +81,12 @@ export default class OrigamiSet<T extends Crease | Vertex> {
             .forEach(key => result += key + ", ")
 
         return result.substring(0, result.length - 2) + "}";
+    }
+
+    /**
+     * Returns the size of this set
+     */
+    size() {
+        return Object.keys(this.items).length;
     }
 }

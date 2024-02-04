@@ -24,9 +24,11 @@ export default class Crease {
     constructor(vertex1: Vertex, vertex2: Vertex, type?: CreaseType) {
         if (vertex1 === null || vertex2 === null) {
             throw new Error("a vertex is null");
+        } else if (vertex1.equals(vertex2)) {
+            throw new Error("vertexes are the same")
         }
 
-        if (Pair.compare(vertex1, vertex2)) {
+        if (Pair.compare(vertex1, vertex2) > 0) {
             [vertex1, vertex2] = [vertex2, vertex1];
         }
 
@@ -82,6 +84,35 @@ export default class Crease {
         splitVertex.creases.add(newCrease1);
         this.vertex2.creases.add(newCrease2);
         splitVertex.creases.add(newCrease2);
+
+        return [newCrease1, newCrease2];
+    }
+
+    /**
+     * Accepts two Creases crease1 and crease2. Finds the unique intersection of the two creases
+     * and returns the Vertex. If no unique intersection exists, returns undefined
+     */
+    static getIntersection(crease1: Crease, crease2: Crease) {
+        const p = crease1.vertex1;
+        const q = crease2.vertex1;
+        const u = crease1.vector;
+        const v = crease2.vector;
+
+        const det = v.x * u.y - v.y * u.x;
+
+        if (det === 0) {
+            // lines are parallel
+            return undefined;
+        }
+
+        const s = (u.x * (q.y - p.y) - u.y * (q.x - p.x)) / det;
+        const t = u.x === 0 ?
+            (q.y + v.y * s - p.y) / u.y :
+            (q.x + v.x * s - p.x) / u.x
+
+        if (s >= 0 && s <= 1 && t >= 0 && t <= 1) {
+            return new Vertex(q.x + v.x * s, q.y + v.y * s);
+        }
     }
 
     /**
