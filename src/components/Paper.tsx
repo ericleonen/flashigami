@@ -10,7 +10,7 @@ const DISPLAY_DIMS = 500;
 const RESOLUTION_DIMS = 1000;
 const PADDING = 10;
 
-const N = 2;
+const N = 8;
 
 const topLeft = new Vertex(PADDING, PADDING);
 const topRight = new Vertex(PADDING + RESOLUTION_DIMS, PADDING);
@@ -93,7 +93,11 @@ function makeCrease(
     }
 }
 
-export default function Paper() {
+type PaperProps = {
+    tool: Tool
+}
+
+export default function Paper({ tool }: PaperProps) {
     const [vertexes, setVertexes] = useState<OrigamiSet<Vertex>>(origVertexes);
     const [creases, setCreases] = useState<OrigamiSet<Crease>>(origCreases);
 
