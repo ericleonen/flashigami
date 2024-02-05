@@ -7,6 +7,7 @@ import Pair from "./Pair";
  * connected creases and other vertexes
  */
 export default class Vertex extends Pair {
+    static hoverRadius = 10;
     creases: OrigamiSet<Crease>;
 
     /**

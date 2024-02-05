@@ -2,13 +2,14 @@
 
 import Crease from "@/origami/Crease";
 import OrigamiSet from "@/origami/OrigamiSet";
+import Pair from "@/origami/Pair";
 import Vertex from "@/origami/Vertex";
 import { useRender } from "@/utils/drawing";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const DISPLAY_DIMS = 500;
 const RESOLUTION_DIMS = 1000;
-const PADDING = 10;
+const PADDING = 15;
 
 const N = 8;
 
@@ -100,11 +101,29 @@ type PaperProps = {
 export default function Paper({ tool }: PaperProps) {
     const [vertexes, setVertexes] = useState<OrigamiSet<Vertex>>(origVertexes);
     const [creases, setCreases] = useState<OrigamiSet<Crease>>(origCreases);
+    const [mousePos, setMousePos] = useState<Pair>();
 
     const canvasRef = useRender({
         vertexes,
-        creases
+        creases,
+        mousePos,
+        tool
     });
+
+    const handleMouseMove = (e: React.MouseEvent) => {
+        const canvas = canvasRef.current;
+        
+        if (!canvas) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+
+        setMousePos(new Pair(
+            (e.clientX - rect.left) * scaleX,
+            (e.clientY - rect.top) * scaleY
+        ));
+    }
 
     return (
         <canvas
@@ -115,6 +134,8 @@ export default function Paper({ tool }: PaperProps) {
             }}
             height={RESOLUTION_DIMS + 2 * PADDING}
             width={RESOLUTION_DIMS + 2 * PADDING}
+            onMouseMove={handleMouseMove}
+            onMouseOut={() => setMousePos(undefined)}
         />
     )
 }

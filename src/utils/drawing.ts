@@ -1,25 +1,26 @@
 import Crease from "@/origami/Crease";
 import OrigamiSet from "@/origami/OrigamiSet";
+import Pair from "@/origami/Pair";
 import Vertex from "@/origami/Vertex";
-import { DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_FORM_ACTIONS, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 
 type RenderData = {
     vertexes: OrigamiSet<Vertex>,
     creases: OrigamiSet<Crease>
+    mousePos?: Pair,
+    tool: Tool
 }
 
-export function useRender(
-    data: RenderData
-) {
+export function useRender(data: RenderData) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
-    const { vertexes, creases } = data;
+    const { vertexes, creases, mousePos, tool } = data;
 
     useEffect(() => {
         const canvas = canvasRef.current;
         const context = canvas && canvas.getContext("2d");
         if (context) render(data, canvas, context);
-    }, [vertexes.toString(), creases.toString()]);
+    }, [vertexes.toString(), creases.toString(), mousePos, tool]);
 
     return canvasRef;
 }
@@ -29,7 +30,7 @@ function render(
     canvas: HTMLCanvasElement, 
     context: CanvasRenderingContext2D
 ) {
-    const { vertexes, creases } = data;
+    const { vertexes, creases, mousePos, tool } = data;
     context.clearRect(0, 0, canvas.width, canvas.height);
 
     creases.forEach(crease => {
@@ -37,13 +38,29 @@ function render(
     });
 
     vertexes.forEach(vertex => {
-        drawVertex(vertex, context);
+        drawVertex(vertex, context, tool, mousePos);
     });
 }
 
-function drawVertex(vertex: Vertex, context: CanvasRenderingContext2D) {
+function drawVertex(
+    vertex: Vertex, 
+    context: CanvasRenderingContext2D,
+    tool: Tool,
+    mousePos?: Pair
+) {
     context.beginPath();
-    context.arc(vertex.x, vertex.y, 5, 0, Math.PI * 2);
+
+    if (mousePos && vertex.getDistance(mousePos) <= Vertex.hoverRadius) {
+        context.fillStyle = 
+            tool === "mountain" ? "red" :
+            tool === "valley" ? "blue" :
+            "gray"
+        context.arc(vertex.x, vertex.y, Vertex.hoverRadius, 0, Math.PI * 2);
+    } else {
+        context.fillStyle = "black";
+        context.arc(vertex.x, vertex.y, 5, 0, Math.PI * 2);
+    }
+
     context.fill();
     context.closePath();
 }
