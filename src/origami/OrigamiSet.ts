@@ -19,6 +19,13 @@ export default class OrigamiSet<T extends Crease | Vertex> {
     }
 
     /**
+     * Returns a copy of this set
+     */
+    getCopy() {
+        return new OrigamiSet<T>(Object.values(this.items));
+    }
+
+    /**
      * Accepts an item. Adds this item to this set if it wasn't there, otherwise does nothing
      */
     add(item: T) {
@@ -64,6 +71,16 @@ export default class OrigamiSet<T extends Crease | Vertex> {
      */
     forEach(callback: (value: T) => any) {
         Object.values(this.items).forEach(callback);
+    }
+
+    /**
+     * Accepts a callback function. Returns the first item in the set that satisfies the callback
+     * condition (returns true). If no item works, returns undefined
+     */
+    find(callback: (value: T) => any) {
+        for (const item of Object.values(this.items)) {
+            if (callback(item)) return item;
+        }
     }
 
     /**

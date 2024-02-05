@@ -8,19 +8,20 @@ type RenderData = {
     vertexes: OrigamiSet<Vertex>,
     creases: OrigamiSet<Crease>
     mousePos?: Pair,
-    tool: Tool
+    tool: Tool,
+    selectedVertex?: Vertex
 }
 
 export function useRender(data: RenderData) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
-    const { vertexes, creases, mousePos, tool } = data;
+    const { vertexes, creases, mousePos, tool, selectedVertex } = data;
 
     useEffect(() => {
         const canvas = canvasRef.current;
         const context = canvas && canvas.getContext("2d");
         if (context) render(data, canvas, context);
-    }, [vertexes.toString(), creases.toString(), mousePos, tool]);
+    }, [vertexes.toString(), creases.toString(), mousePos, tool, selectedVertex]);
 
     return canvasRef;
 }
@@ -30,7 +31,7 @@ function render(
     canvas: HTMLCanvasElement, 
     context: CanvasRenderingContext2D
 ) {
-    const { vertexes, creases, mousePos, tool } = data;
+    const { vertexes, creases, mousePos, tool, selectedVertex } = data;
     context.clearRect(0, 0, canvas.width, canvas.height);
 
     creases.forEach(crease => {
@@ -38,7 +39,7 @@ function render(
     });
 
     vertexes.forEach(vertex => {
-        drawVertex(vertex, context, tool, mousePos);
+        drawVertex(vertex, context, tool, mousePos, selectedVertex);
     });
 }
 
@@ -46,11 +47,17 @@ function drawVertex(
     vertex: Vertex, 
     context: CanvasRenderingContext2D,
     tool: Tool,
-    mousePos?: Pair
+    mousePos?: Pair,
+    selectedVertex?: Vertex
 ) {
     context.beginPath();
-
-    if (mousePos && vertex.getDistance(mousePos) <= Vertex.hoverRadius) {
+    if (selectedVertex && selectedVertex.equals(vertex)) {
+        context.fillStyle = 
+            tool === "mountain" ? "red" :
+            tool === "valley" ? "blue" :
+            "gray"
+        context.arc(vertex.x, vertex.y, 5, 0, Math.PI * 2);
+    } else if (mousePos && vertex.getDistance(mousePos) <= Vertex.hoverRadius) {
         context.fillStyle = 
             tool === "mountain" ? "red" :
             tool === "valley" ? "blue" :

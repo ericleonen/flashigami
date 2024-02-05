@@ -55,8 +55,15 @@ function makeCrease(
     vertex1: Vertex, 
     vertex2: Vertex, 
     vertexes: OrigamiSet<Vertex>,
-    creases: OrigamiSet<Crease>
-) {
+    creases: OrigamiSet<Crease>,
+    tool: Tool = "crease",
+    copy: boolean = false
+): [OrigamiSet<Vertex>, OrigamiSet<Crease>] {
+    if (copy) {
+        vertexes = vertexes.getCopy();
+        creases = creases.getCopy();
+    }
+
     const newVertexes: Vertex[] = [];
     const newCreases: Crease[] = [];
     const removeCreases: Crease[] = [];
@@ -87,11 +94,14 @@ function makeCrease(
         newVertexes.sort(Vertex.compare);
 
         for (let i = 1; i < newVertexes.length; i++) {
+            if (newVertexes[i - 1].equals(newVertexes[i])) continue;
             creases.add(
                 new Crease(newVertexes[i - 1], newVertexes[i])
             )
         }   
     }
+
+    return [vertexes, creases];
 }
 
 type PaperProps = {
@@ -102,13 +112,42 @@ export default function Paper({ tool }: PaperProps) {
     const [vertexes, setVertexes] = useState<OrigamiSet<Vertex>>(origVertexes);
     const [creases, setCreases] = useState<OrigamiSet<Crease>>(origCreases);
     const [mousePos, setMousePos] = useState<Pair>();
+    const [selectedVertex, setSelectedVertex] = useState<Vertex>();
 
     const canvasRef = useRender({
         vertexes,
         creases,
         mousePos,
-        tool
+        tool,
+        selectedVertex
     });
+
+    const handleClick = () => {
+        const clicked = mousePos && vertexes.find(
+            item => item.getDistance(mousePos) <= Vertex.hoverRadius
+        );
+
+        if (!clicked) return;
+
+        if (!selectedVertex) {
+            // select the first vertex
+            setSelectedVertex(clicked);
+        } else {
+            // select the second vertex and make a crease
+            const [newVertexes, newCreases] = makeCrease(
+                selectedVertex, 
+                clicked, 
+                vertexes, 
+                creases, 
+                "mountain", 
+                true
+            );
+            setVertexes(newVertexes);
+            setCreases(newCreases);
+
+            setSelectedVertex(undefined);
+        }
+    }
 
     const handleMouseMove = (e: React.MouseEvent) => {
         const canvas = canvasRef.current;
@@ -136,6 +175,7 @@ export default function Paper({ tool }: PaperProps) {
             width={RESOLUTION_DIMS + 2 * PADDING}
             onMouseMove={handleMouseMove}
             onMouseOut={() => setMousePos(undefined)}
+            onClick={handleClick}
         />
     )
 }
