@@ -59,6 +59,10 @@ function makeCrease(
     tool: Tool = "crease",
     copy: boolean = false
 ): [OrigamiSet<Vertex>, OrigamiSet<Crease>] {
+    if (tool === "eraser") {
+        throw new Error("eraser can't make a crease");
+    }
+
     if (copy) {
         vertexes = vertexes.getCopy();
         creases = creases.getCopy();
@@ -67,7 +71,9 @@ function makeCrease(
     const newVertexes: Vertex[] = [];
     const newCreases: Crease[] = [];
     const removeCreases: Crease[] = [];
-    const fullCrease = new Crease(vertex1, vertex2);
+
+    const creaseType = tool === "crease" ? undefined : tool;
+    const fullCrease = new Crease(vertex1, vertex2, creaseType);
 
     creases.forEach(crease => {
         const intersection = Crease.getIntersection(fullCrease, crease);
@@ -96,7 +102,7 @@ function makeCrease(
         for (let i = 1; i < newVertexes.length; i++) {
             if (newVertexes[i - 1].equals(newVertexes[i])) continue;
             creases.add(
-                new Crease(newVertexes[i - 1], newVertexes[i])
+                new Crease(newVertexes[i - 1], newVertexes[i], creaseType)
             )
         }   
     }
@@ -139,7 +145,7 @@ export default function Paper({ tool }: PaperProps) {
                 clicked, 
                 vertexes, 
                 creases, 
-                "mountain", 
+                tool, 
                 true
             );
             setVertexes(newVertexes);

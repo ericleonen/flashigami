@@ -77,8 +77,8 @@ export default class Crease {
         this.vertex1.creases.delete(this);
         this.vertex2.creases.delete(this);
 
-        const newCrease1 = new Crease(this.vertex1, splitVertex);
-        const newCrease2 = new Crease(this.vertex2, splitVertex);
+        const newCrease1 = new Crease(this.vertex1, splitVertex, this.type);
+        const newCrease2 = new Crease(this.vertex2, splitVertex, this.type);
 
         this.vertex1.creases.add(newCrease1);
         splitVertex.creases.add(newCrease1);

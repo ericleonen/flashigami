@@ -77,6 +77,12 @@ function drawCrease(crease: Crease, context: CanvasRenderingContext2D) {
     const p2 = crease.vertex2;
     
     context.beginPath();
+
+    context.strokeStyle = 
+        crease.type === "mountain" ? "red" :
+        crease.type === "valley" ? "blue" :
+        "gray"
+
     context.moveTo(p1.x, p1.y);
     context.lineTo(p2.x, p2.y);
     context.stroke();
