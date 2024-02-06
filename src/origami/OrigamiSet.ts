@@ -84,23 +84,6 @@ export default class OrigamiSet<T extends Crease | Vertex> {
     }
 
     /**
-     * Returns the unique String representation of this set
-     */
-    toString() {
-        if (this.isEmpty()) {
-            return "{}";
-        }
-
-        let result = "{";
-
-        Object.keys(this.items)
-            .toSorted()
-            .forEach(key => result += key + ", ")
-
-        return result.substring(0, result.length - 2) + "}";
-    }
-
-    /**
      * Returns the size of this set
      */
     size() {
