@@ -21,7 +21,7 @@ export function useRender(data: RenderData) {
         const canvas = canvasRef.current;
         const context = canvas && canvas.getContext("2d");
         if (context) render(data, canvas, context);
-    }, [vertexes.toString(), creases.toString(), mousePos, tool, selectedVertex]);
+    }, [vertexes.toString(), creases, mousePos, tool, selectedVertex]);
 
     return canvasRef;
 }

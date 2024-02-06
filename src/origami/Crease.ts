@@ -129,8 +129,6 @@ export default class Crease {
      * Returns the unique String representation of this crease
      */
     toString() {
-        const typeLetter = this.type ? this.type.charAt(0).toUpperCase() : "U";
-
-        return `${typeLetter}[${this.vertex1.toString()}, ${this.vertex2.toString()}]`;
+        return `[${this.vertex1.toString()}, ${this.vertex2.toString()}]`;
     }
 }

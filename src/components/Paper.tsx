@@ -11,7 +11,7 @@ const DISPLAY_DIMS = 500;
 const RESOLUTION_DIMS = 1000;
 const PADDING = 15;
 
-const N = 8;
+const N = 2;
 
 const topLeft = new Vertex(PADDING, PADDING);
 const topRight = new Vertex(PADDING + RESOLUTION_DIMS, PADDING);
