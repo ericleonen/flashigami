@@ -50,4 +50,11 @@ export default class Pair {
             return p1.x - p2.x;
         }
     }
+
+    /**
+     * Accepts numbers x and y. Returns a pair String representation of (x, y)
+     */
+    static toString(x: number, y: number) {
+        return `(${x}, ${y})`;
+    }
 }

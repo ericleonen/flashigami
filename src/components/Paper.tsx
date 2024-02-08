@@ -136,11 +136,58 @@ function deleteCrease(
 
 function deleteVertex(
     vertex: Vertex,
-    vertexes: OrigamiSet<Vertex>
-) {
+    vertexes: OrigamiSet<Vertex>,
+    creases: OrigamiSet<Crease>
+): [OrigamiSet<Vertex>, OrigamiSet<Crease>] {
     vertexes = vertexes.getCopy();
+    creases = creases.getCopy();
+
+    // if the vertex has an "unmatched" crease, do not delete
+    // otherwise, delete the vertex and join any parallel pairs of creases
+    // throw an error if there are three or more creases that are all paralle to each other? this is a duplicate
+
+    const creaseMap: { [key: string]: Crease[] } = {};
+    const getCreaseKey = (crease: Crease) => {
+        const v = crease.vector;
+
+        if (v.x === 0) return Pair.toString(0, 1);
+
+        const unit = v.getScaled((v.x < 0 ? -1 : 1) / v.magnitude);
+        return Pair.toString(unit.x, unit.y);
+    }
+
+    vertex.creases.forEach(crease => {
+        const key = getCreaseKey(crease);
+
+        if (!creaseMap.hasOwnProperty(key)) {
+            creaseMap[key] = [crease];
+        } else {
+            creaseMap[key].push(crease);
+        }
+    });
+
+    const creasesList = Object.values(creaseMap)
+
+    if (creasesList.every(arr => arr.length === 2)) {
+        for (const pair of creasesList) {
+            const [crease1, crease2] = pair;
+
+            if (crease1.type !== crease2.type) continue;
+
+            const other1 = crease1.getOtherVertex(vertex);
+            const other2 = crease2.getOtherVertex(vertex);
+
+            creases.deleteAll([crease1, crease2]);
+            creases.add(new Crease(other1, other2, crease1.type));
+
+            other1.creases.delete(crease1);
+            other2.creases.delete(crease2);
+        }
+    }
+
     vertexes.delete(vertex);
-    return vertexes;
+
+    return [vertexes, creases];
 }
 
 type PaperProps = {
@@ -167,8 +214,11 @@ export default function Paper({ tool }: PaperProps) {
 
         if (clicked instanceof Vertex) {
             if (tool === "eraser") {
-                if (origVertexes.has(clicked) || clicked.creases.size() > 0) return;
-                setVertexes(deleteVertex(clicked, vertexes));
+                if (origVertexes.has(clicked)) return;
+                const [newVertexes, newCreases] = deleteVertex(clicked, vertexes, creases);
+
+                setVertexes(newVertexes);
+                setCreases(newCreases);
             }
             else if (!selectedVertex) {
                 // select the first vertex
