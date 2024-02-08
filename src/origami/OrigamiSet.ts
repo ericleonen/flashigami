@@ -89,4 +89,11 @@ export default class OrigamiSet<T extends Crease | Vertex> {
     size() {
         return Object.keys(this.items).length;
     }
+
+    /**
+     * Returns a list representation of this set
+     */
+    toList() {
+        return Object.values(this.items);
+    }
 }

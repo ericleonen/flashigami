@@ -31,6 +31,16 @@ const origCreases = new OrigamiSet<Crease>([
     new Crease(bottomLeft, bottomRight)
 ]);
 
+function isEdge(crease: Crease) {
+    return (
+        crease.vertex1.y === crease.vertex2.y && 
+            [PADDING, PADDING + RESOLUTION_DIMS].includes(crease.vertex2.y)
+        ||
+        crease.vertex1.x === crease.vertex2.x && 
+            [PADDING, PADDING + RESOLUTION_DIMS].includes(crease.vertex2.x)
+    )
+}
+
 for (let i = 1; i < N; i++) {
     const x = PADDING + i * RESOLUTION_DIMS / N;
     const top = new Vertex(x, PADDING);
@@ -68,7 +78,7 @@ function makeCrease(
         creases = creases.getCopy();
     }
 
-    const newVertexes: Vertex[] = [];
+    const newVertexes = new OrigamiSet<Vertex>();
     const newCreases: Crease[] = [];
     const removeCreases: Crease[] = [];
 
@@ -79,7 +89,7 @@ function makeCrease(
         const intersection = Crease.getIntersection(fullCrease, crease);
 
         if (intersection) {
-            newVertexes.push(intersection);
+            newVertexes.add(intersection);
             vertexes.add(intersection);
 
             const splitCreases = crease.split(intersection);
@@ -94,20 +104,43 @@ function makeCrease(
     creases.deleteAll(removeCreases);
     creases.addAll(newCreases);
 
-    if (newVertexes.length <= 2) {
+    if (newVertexes.size() <= 2) {
         creases.add(fullCrease);
     } else {
-        newVertexes.sort(Vertex.compare);
+        const newVertexesList = Object.values(newVertexes.items).sort(Vertex.compare);
 
-        for (let i = 1; i < newVertexes.length; i++) {
-            if (newVertexes[i - 1].equals(newVertexes[i])) continue;
+        for (let i = 1; i < newVertexesList.length; i++) {
             creases.add(
-                new Crease(newVertexes[i - 1], newVertexes[i], creaseType)
+                new Crease(newVertexesList[i - 1], newVertexesList[i], creaseType)
             )
         }   
     }
 
     return [vertexes, creases];
+}
+
+function deleteCrease(
+    crease: Crease,
+    vertexes: OrigamiSet<Vertex>,
+    creases: OrigamiSet<Crease>,
+) : [OrigamiSet<Vertex>, OrigamiSet<Crease>] {
+    creases = creases.getCopy();
+    vertexes = vertexes.getCopy();
+
+    creases.delete(crease);
+    crease.vertex1.creases.delete(crease);
+    crease.vertex2.creases.delete(crease);
+
+    return [vertexes, creases];
+}
+
+function deleteVertex(
+    vertex: Vertex,
+    vertexes: OrigamiSet<Vertex>
+) {
+    vertexes = vertexes.getCopy();
+    vertexes.delete(vertex);
+    return vertexes;
 }
 
 type PaperProps = {
@@ -117,41 +150,69 @@ type PaperProps = {
 export default function Paper({ tool }: PaperProps) {
     const [vertexes, setVertexes] = useState<OrigamiSet<Vertex>>(origVertexes);
     const [creases, setCreases] = useState<OrigamiSet<Crease>>(origCreases);
-    const [mousePos, setMousePos] = useState<Pair>();
+    const [hovered, setHovered] = useState<Vertex | Crease>();
     const [selectedVertex, setSelectedVertex] = useState<Vertex>();
 
     const canvasRef = useRender({
         vertexes,
         creases,
-        mousePos,
+        hovered,
         tool,
         selectedVertex
     });
 
     const handleClick = () => {
-        const clicked = mousePos && vertexes.find(
-            item => item.getDistance(mousePos) <= Vertex.hoverRadius
-        );
-
+        const clicked = hovered;
         if (!clicked) return;
 
-        if (!selectedVertex) {
-            // select the first vertex
-            setSelectedVertex(clicked);
-        } else {
-            // select the second vertex and make a crease
-            const [newVertexes, newCreases] = makeCrease(
-                selectedVertex, 
-                clicked, 
-                vertexes, 
-                creases, 
-                tool, 
-                true
-            );
-            setVertexes(newVertexes);
-            setCreases(newCreases);
+        if (clicked instanceof Vertex) {
+            if (tool === "eraser") {
+                if (origVertexes.has(clicked) || clicked.creases.size() > 0) return;
+                setVertexes(deleteVertex(clicked, vertexes));
+            }
+            else if (!selectedVertex) {
+                // select the first vertex
+                setSelectedVertex(clicked);
+            } else {
+                // select the second vertex and make a crease
+                const [newVertexes, newCreases] = makeCrease(
+                    selectedVertex, 
+                    clicked, 
+                    vertexes, 
+                    creases, 
+                    tool, 
+                    true
+                );
+                setVertexes(newVertexes);
+                setCreases(newCreases);
+                setSelectedVertex(undefined);
+            }
+        } else if (clicked instanceof Crease) {
+            if (tool === "eraser") {
+                const [newVertexes, newCreases] = deleteCrease(
+                    clicked,
+                    vertexes,
+                    creases
+                );
 
-            setSelectedVertex(undefined);
+                setVertexes(newVertexes);
+                setCreases(newCreases);
+                setSelectedVertex(undefined);
+                setHovered(undefined);
+            } else {
+                const [newVertexes, newCreases] = makeCrease(
+                    clicked.vertex1,
+                    clicked.vertex2,
+                    vertexes,
+                    creases,
+                    tool,
+                    true
+                );
+                setVertexes(newVertexes);
+                setCreases(newCreases);
+                setSelectedVertex(undefined);
+                setHovered(undefined);
+            }
         }
     }
 
@@ -164,10 +225,33 @@ export default function Paper({ tool }: PaperProps) {
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
 
-        setMousePos(new Pair(
+        const mousePos = new Pair(
             (e.clientX - rect.left) * scaleX,
             (e.clientY - rect.top) * scaleY
-        ));
+        );
+        let hoveredFound = false;
+        for (const vertex of vertexes.toList()) {
+            if (vertex.getDistance(mousePos) <= Vertex.hoverRadius) {
+                setHovered(vertex);
+                hoveredFound = true;
+                break;
+            }
+        }
+        if (!hoveredFound) {
+            for (const crease of creases.toList()) {
+                if (isEdge(crease)) continue;
+
+                const dist = crease.getDistance(mousePos)
+
+                if (dist && dist <= Crease.hoverRadius) {
+                    setHovered(crease);
+                    hoveredFound = true;
+                    break;
+                }
+            }
+        }
+
+        if (!hoveredFound) setHovered(undefined);
     }
 
     return (
@@ -180,7 +264,6 @@ export default function Paper({ tool }: PaperProps) {
             height={RESOLUTION_DIMS + 2 * PADDING}
             width={RESOLUTION_DIMS + 2 * PADDING}
             onMouseMove={handleMouseMove}
-            onMouseOut={() => setMousePos(undefined)}
             onClick={handleClick}
         />
     )

@@ -15,6 +15,7 @@ export default class Crease {
     vertex2: Vertex;
     vector: Vector
     type: CreaseType;
+    static hoverRadius = 8;
 
     /**
      * Accepts two Vertexes, vertex1 and vertex2, and an optional CreaseType type. Initializes
@@ -130,5 +131,20 @@ export default class Crease {
      */
     toString() {
         return `[${this.vertex1.toString()}, ${this.vertex2.toString()}]`;
+    }
+
+    /**
+     * Returns the distance from p, a Pair. If p outside of the crease, returns undefined
+     */
+    getDistance(p: Pair) {
+        const otherVector = new Vector(p.x - this.vertex1.x, p.y - this.vertex1.y);
+
+        if (otherVector.dot(this.vector) < 0 || otherVector.magnitude > this.vector.magnitude) {
+            return undefined;
+        }
+
+        const proj = this.vector.getProjection(otherVector);
+
+        return proj.getDifference(otherVector).magnitude;
     }
 }

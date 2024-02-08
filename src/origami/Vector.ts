@@ -33,13 +33,13 @@ export default class Vector extends Pair {
      * Returns a new Vector that is a copy of this one
      */
     getCopy(): Vector {
-        return super.getCopy() as Vector;
+        return new Vector(this.x, this.y);
     }
 
     /**
      * Mutates this vector into an orthogonal vector. Returns this vector
      */
-    asOrthogonal(): Vector {
+    orthogonal(): Vector {
         this.x, this.y = -this.y, this.x;
 
         return this;
@@ -50,7 +50,7 @@ export default class Vector extends Pair {
      */
     getOrthogonal(): Vector {
         const copy = this.getCopy();
-        return copy.asOrthogonal();
+        return copy.orthogonal();
     }
 
     /**
@@ -58,5 +58,53 @@ export default class Vector extends Pair {
      */
     isParallelTo(other: Vector): boolean {
         return this.x * other.y - this.y * other.x === 0;
+    }
+
+    /**
+     * Accepts an other Vector. Returns the dot product of this and the other vector
+     */
+    dot(other: Vector) {
+        return this.x * other.x + this.y * other.y;
+    }
+
+    /**
+     * Accepts a number c. Scales this vector by a factor of c. Returns this vector
+     */
+    scale(c: number) {
+        this.x *= c;
+        this.y *= c;
+        this.magnitude *= c;
+
+        return this;
+    }
+
+    /**
+     * Accepts a number c. Returns a new vector scaled by a factor of c
+     */
+    getScaled(c: number): Vector {
+        const copy = this.getCopy();
+        return copy.scale(c);
+    }
+
+    /**
+     * Accepts an other Vector. Returns the projection of this other vector onto this vector
+     */
+    getProjection(other: Vector) {
+        const comp = this.dot(other) / this.magnitude;
+        return this.getScaled(comp / this.magnitude);
+    }
+
+    /**
+     * Accepts an other Vector. Returns a new vector with the value of this - other
+     */
+    getDifference(other: Vector) {
+        return new Vector(this.x - other.x, this.y - other.y);
+    }
+
+    /**
+     * Returns a String representation of this vector
+     */
+    toString() {
+        return `<${this.x}, ${this.y}>`;
     }
 }
