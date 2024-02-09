@@ -11,7 +11,7 @@ const DISPLAY_DIMS = 500;
 const RESOLUTION_DIMS = 1000;
 const PADDING = 15;
 
-const N = 2;
+const N = 16;
 
 const topLeft = new Vertex(PADDING, PADDING);
 const topRight = new Vertex(PADDING + RESOLUTION_DIMS, PADDING);
@@ -141,11 +141,6 @@ function deleteVertex(
 ): [OrigamiSet<Vertex>, OrigamiSet<Crease>] {
     vertexes = vertexes.getCopy();
     creases = creases.getCopy();
-
-    // if the vertex has an "unmatched" crease, do not delete
-    // otherwise, delete the vertex and join any parallel pairs of creases
-    // throw an error if there are three or more creases that are all paralle to each other? this is a duplicate
-
     const creaseMap: { [key: string]: Crease[] } = {};
     const getCreaseKey = (crease: Crease) => {
         const v = crease.vector;
@@ -168,12 +163,10 @@ function deleteVertex(
 
     const creasesList = Object.values(creaseMap)
 
-    if (creasesList.every(arr => arr.length === 2)) {
-        for (const pair of creasesList) {
-            const [crease1, crease2] = pair;
+    if (creasesList.length === 1 && creasesList[0].length === 2) {
+        const [crease1, crease2] = creasesList[0];
 
-            if (crease1.type !== crease2.type) continue;
-
+        if (crease1.type === crease2.type) {
             const other1 = crease1.getOtherVertex(vertex);
             const other2 = crease2.getOtherVertex(vertex);
 
@@ -182,10 +175,12 @@ function deleteVertex(
 
             other1.creases.delete(crease1);
             other2.creases.delete(crease2);
-        }
-    }
 
-    vertexes.delete(vertex);
+            vertexes.delete(vertex);
+        }
+    } else if (creasesList.length === 0) {
+        vertexes.delete(vertex);
+    }
 
     return [vertexes, creases];
 }
