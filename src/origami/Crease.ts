@@ -38,8 +38,8 @@ export default class Crease {
         this.vector = new Vector(vertex1, vertex2);
         this.type = type;
 
-        this.vertex1.creases.add(this);
-        this.vertex2.creases.add(this);
+        this.vertex1.addCrease(this);
+        this.vertex2.addCrease(this);
     }
 
     /**
@@ -75,16 +75,11 @@ export default class Crease {
             return;
         }
 
-        this.vertex1.creases.delete(this);
-        this.vertex2.creases.delete(this);
+        this.vertex1.deleteCrease(this);
+        this.vertex2.deleteCrease(this);
 
         const newCrease1 = new Crease(this.vertex1, splitVertex, this.type);
         const newCrease2 = new Crease(this.vertex2, splitVertex, this.type);
-
-        this.vertex1.creases.add(newCrease1);
-        splitVertex.creases.add(newCrease1);
-        this.vertex2.creases.add(newCrease2);
-        splitVertex.creases.add(newCrease2);
 
         return [newCrease1, newCrease2];
     }

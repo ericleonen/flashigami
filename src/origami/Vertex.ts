@@ -10,6 +10,9 @@ export default class Vertex extends Pair {
     static hoverRadius = 10;
     creases: OrigamiSet<Crease>;
 
+    mountains: number;
+    valleys: number;
+
     /**
      * Accepts numbers x and y and an optional OrigamiSet of Crease creases. Initializes a vertex at
      * (x, y). Initializes creases as the given OrigamiSet of Crease creases if given, otherwise as 
@@ -18,6 +21,16 @@ export default class Vertex extends Pair {
     constructor(x: number, y: number, creases?: OrigamiSet<Crease>) {
         super(x, y);
         this.creases = creases ? creases : new OrigamiSet();
+        this.mountains = 0;
+        this.valleys = 0;
+
+        this.creases.forEach(crease => {
+            if (crease.type === "mountain") {
+                this.mountains++;
+            } else if (crease.type === "valley") {
+                this.valleys++;
+            }
+        })
     }
 
     /**
@@ -25,5 +38,42 @@ export default class Vertex extends Pair {
      */
     toString() {
         return `(${this.x}, ${this.y})`;
+    }
+
+    /**
+     * Accepts creases and adds all of them to this vertex
+     */
+    addCrease(...creases: Crease[]) {
+        creases.forEach(crease => {
+            if (crease.type === "mountain") {
+                this.mountains++;
+            } else if (crease.type === "valley") {
+                this.valleys++;
+            }
+
+            this.creases.add(crease);
+        });
+    }
+
+    /**
+     * Accepts creases and deletes all of them from this vertex
+     */
+    deleteCrease(...creases: Crease[]) {
+        creases.forEach(crease => {
+            if (crease.type === "mountain") {
+                this.mountains--;
+            } else if (crease.type === "valley") {
+                this.valleys--;
+            }
+
+            this.creases.delete(crease);
+        });
+    }
+
+    /**
+     * Returns true if Maekawa's theorem is satisfied by this vertex
+     */
+    checkMaekawa() {
+        return this.mountains + this.valleys === 0 || Math.abs(this.mountains - this.valleys) === 2;
     }
 }

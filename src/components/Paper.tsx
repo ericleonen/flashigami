@@ -78,7 +78,7 @@ function makeCrease(
         creases = creases.getCopy();
     }
 
-    const newVertexes = new OrigamiSet<Vertex>();
+    const involvedVertexes = new OrigamiSet<Vertex>([vertex1, vertex2]);
     const newCreases: Crease[] = [];
     const removeCreases: Crease[] = [];
 
@@ -86,10 +86,16 @@ function makeCrease(
     const fullCrease = new Crease(vertex1, vertex2, creaseType);
 
     creases.forEach(crease => {
-        const intersection = Crease.getIntersection(fullCrease, crease);
+        let intersection = Crease.getIntersection(fullCrease, crease);
+
+        if (intersection?.equals(vertex1)) {
+            intersection = vertex1;
+        } else if (intersection?.equals(vertex2)) {
+            intersection = vertex2;
+        }
 
         if (intersection) {
-            newVertexes.add(intersection);
+            involvedVertexes.add(intersection);
             vertexes.add(intersection);
 
             const splitCreases = crease.split(intersection);
@@ -101,20 +107,19 @@ function makeCrease(
         }
     });
 
-    creases.deleteAll(removeCreases);
-    creases.addAll(newCreases);
+    creases.delete(...removeCreases);
+    creases.add(...newCreases);
 
-    if (newVertexes.size() <= 2) {
-        creases.add(fullCrease);
-    } else {
-        const newVertexesList = Object.values(newVertexes.items).sort(Vertex.compare);
+    vertex1.deleteCrease(fullCrease);
+    vertex2.deleteCrease(fullCrease);
 
-        for (let i = 1; i < newVertexesList.length; i++) {
-            creases.add(
-                new Crease(newVertexesList[i - 1], newVertexesList[i], creaseType)
-            )
-        }   
-    }
+    const involvedVertexesList = involvedVertexes.toList().sort(Vertex.compare);
+
+    for (let i = 1; i < involvedVertexesList.length; i++) {
+        creases.add(
+            new Crease(involvedVertexesList[i - 1], involvedVertexesList[i], creaseType)
+        )
+    } 
 
     return [vertexes, creases];
 }
@@ -128,8 +133,8 @@ function deleteCrease(
     vertexes = vertexes.getCopy();
 
     creases.delete(crease);
-    crease.vertex1.creases.delete(crease);
-    crease.vertex2.creases.delete(crease);
+    crease.vertex1.deleteCrease(crease);
+    crease.vertex2.deleteCrease(crease);
 
     return [vertexes, creases];
 }
@@ -141,45 +146,24 @@ function deleteVertex(
 ): [OrigamiSet<Vertex>, OrigamiSet<Crease>] {
     vertexes = vertexes.getCopy();
     creases = creases.getCopy();
-    const creaseMap: { [key: string]: Crease[] } = {};
-    const getCreaseKey = (crease: Crease) => {
-        const v = crease.vector;
 
-        if (v.x === 0) return Pair.toString(0, 1);
-
-        const unit = v.getScaled((v.x < 0 ? -1 : 1) / v.magnitude);
-        return Pair.toString(unit.x, unit.y);
-    }
-
-    vertex.creases.forEach(crease => {
-        const key = getCreaseKey(crease);
-
-        if (!creaseMap.hasOwnProperty(key)) {
-            creaseMap[key] = [crease];
-        } else {
-            creaseMap[key].push(crease);
-        }
-    });
-
-    const creasesList = Object.values(creaseMap)
-
-    if (creasesList.length === 1 && creasesList[0].length === 2) {
-        const [crease1, crease2] = creasesList[0];
-
-        if (crease1.type === crease2.type) {
-            const other1 = crease1.getOtherVertex(vertex);
-            const other2 = crease2.getOtherVertex(vertex);
-
-            creases.deleteAll([crease1, crease2]);
-            creases.add(new Crease(other1, other2, crease1.type));
-
-            other1.creases.delete(crease1);
-            other2.creases.delete(crease2);
-
-            vertexes.delete(vertex);
-        }
-    } else if (creasesList.length === 0) {
+    if (vertex.creases.isEmpty()) {
         vertexes.delete(vertex);
+    } else if (vertex.creases.size() === 2) {
+        const [crease1, crease2] = vertex.creases.toList();
+
+        if (crease1.vector.isParallelTo(crease2.vector) && crease1.type === crease2.type) {
+            vertexes.delete(vertex);
+
+            const vertex1 = crease1.getOtherVertex(vertex);
+            const vertex2 = crease2.getOtherVertex(vertex);
+
+            vertex1.deleteCrease(crease1);
+            vertex2.deleteCrease(crease2);
+
+            creases.delete(crease1, crease2);
+            creases.add(new Crease(vertex1, vertex2, crease1.type));
+        }
     }
 
     return [vertexes, creases];

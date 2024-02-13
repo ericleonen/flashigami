@@ -74,8 +74,10 @@ function drawVertex(
             tool === "valley" ? "blue" :
             "gray"
         context.arc(vertex.x, vertex.y, Vertex.hoverRadius, 0, Math.PI * 2);
+
+        console.log(hoveredVertex);
     } else {
-        context.fillStyle = "black";
+        context.fillStyle = vertex.checkMaekawa() ? "black" : "orange";
         context.arc(vertex.x, vertex.y, 5, 0, Math.PI * 2);
     }
 

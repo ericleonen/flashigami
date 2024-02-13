@@ -26,32 +26,19 @@ export default class OrigamiSet<T extends Crease | Vertex> {
     }
 
     /**
-     * Accepts an item. Adds this item to this set if it wasn't there, otherwise does nothing
+     * Accepts items and adds them to this set
      */
-    add(item: T) {
-        this.items[item.toString()] = item;
-    }
-
-    /** 
-     * Accepts a list of items. Adds each item to the set
-    */
-    addAll(items: T[]) {
-        items.forEach(item => this.add(item));
+    add(...items: T[]) {
+        items.forEach(item => this.items[item.toString()] = item);
     }
 
     /**
-     * Accepts an item. Deletes this item from this set if it was there, otherwise does nothing
+     * Accepts items and deletes them from this set
      */
-    delete(item: T) {
-        delete this.items[item.toString()];
+    delete(...items: T[]) {
+        items.forEach(item => delete this.items[item.toString()]);
     }
 
-    /**
-     * Accepts a list of items. Deletes each item from the set
-     */
-    deleteAll(items: T[]) {
-        items.forEach(item => this.delete(item));
-    }
     /**
      * Accepts an item. Returns true if this set contains the item
      */
