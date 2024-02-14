@@ -102,6 +102,41 @@ export default class Vector extends Pair {
     }
 
     /**
+     * Returns this vector's angle in radians from 0 to 2 * PI. Returns undefined if given the 0
+     * vector
+     */
+    getAngle() {
+        if (this.x > 0 && this.y === 0) {
+            // positive x-axis
+            return 0;
+        } else if (this.x > 0 && this.y < 0) {
+            // first quadrant
+            return Math.atan(-this.y / this.x);
+        } else if (this.x === 0 && this.y < 0) {
+            // positive y-axis
+            return Math.PI / 2;
+        } else if (this.x < 0 && this.y < 0) {
+            // second quadrant
+            return Math.PI + Math.atan(-this.y / this.x);
+        } else if (this.x < 0 && this.y === 0) {
+            // negative x-axis
+            return Math.PI;
+        } else if (this.x < 0 && this.y > 0) {
+            // third quadrant
+            return Math.PI + Math.atan(-this.y / this.x);
+        } else if (this.x === 0 && this.y > 0) {
+            // negative y-axis
+            return 3 / 2 * Math.PI;
+        } else if (this.x > 0 && this.y > 0) {
+            // fourth quadrant
+            return 2 * Math.PI + Math.atan(-this.y / this.x);
+        } else {
+            // origin
+            return undefined;
+        }
+    }
+
+    /**
      * Returns a String representation of this vector
      */
     toString() {

@@ -142,4 +142,34 @@ export default class Crease {
 
         return proj.getDifference(otherVector).magnitude;
     }
+
+    /**
+     * Accepts a Vertex vertex. Returns the creases angle relative to that vertex. Throws an Error
+     * if the given vertex is not on an endpoint on this crease
+     */
+    getAngle(vertex: Vertex) {
+        if (vertex.equals(this.vertex1)) {
+            return this.vector.getAngle();
+        } else if (vertex.equals(this.vertex2)) {
+            return this.vector.getScaled(-1).getAngle();
+        } else {
+            throw new Error("given vertex not on crease");
+        }
+    }
+
+    /**
+     * Accepts Creases crease1 and crease2. Returns the difference in angles. If that is 0, returns
+     * the difference in magnitudes. Throws an Error if any one of the creases have the 0 vector
+     */
+    static compare(crease1: Crease, crease2: Crease) {
+        const angle1 = crease1.vector.getAngle();
+        const angle2 = crease2.vector.getAngle();
+
+        if (angle1 === undefined || angle2 === undefined) {
+            throw new Error("given crease is 0");
+        }
+
+        return (angle1 === angle2) ? 
+            crease1.vector.magnitude - crease2.vector.magnitude : angle1 - angle2;
+    }
 }

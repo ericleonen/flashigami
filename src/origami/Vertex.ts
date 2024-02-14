@@ -74,6 +74,31 @@ export default class Vertex extends Pair {
      * Returns true if Maekawa's theorem is satisfied by this vertex
      */
     checkMaekawa() {
-        return this.mountains + this.valleys === 0 || Math.abs(this.mountains - this.valleys) === 2;
+        return this.mountains + this.valleys === 0
+            || Math.abs(this.mountains - this.valleys) === 2;
+    }
+
+    /**
+     * Returns true if Kawasaki's theorem is satisfied by this vertex
+     */
+    checkKawasaki() {
+        const angles = this.creases
+            .toList()
+            .filter(crease => !!crease.type)
+            .map(crease => crease.getAngle(this))
+            .sort()
+
+        if (angles.length === 0) return true;
+
+        if (angles.length % 2 !== 0) return false;
+
+        let angleSum = 0;
+        for (let i = 0; i < angles.length - 1; i += 2) {
+            angleSum = angles[i + 1]! - angles[i]!;
+        }
+
+        console.log(angleSum);
+
+        return angleSum === Math.PI;
     }
 }

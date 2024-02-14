@@ -74,10 +74,11 @@ function drawVertex(
             tool === "valley" ? "blue" :
             "gray"
         context.arc(vertex.x, vertex.y, Vertex.hoverRadius, 0, Math.PI * 2);
-
-        console.log(hoveredVertex);
     } else {
-        context.fillStyle = vertex.checkMaekawa() ? "black" : "orange";
+        context.fillStyle = 
+            !vertex.checkMaekawa() ? "orange" :
+            !vertex.checkKawasaki() ? "purple" :
+            "black"
         context.arc(vertex.x, vertex.y, 5, 0, Math.PI * 2);
     }
 
