@@ -88,10 +88,12 @@ function makeCrease(
     creases.forEach(crease => {
         let intersection = Crease.getIntersection(fullCrease, crease);
 
-        if (intersection?.equals(vertex1)) {
-            intersection = vertex1;
-        } else if (intersection?.equals(vertex2)) {
-            intersection = vertex2;
+        if (intersection) {
+            if (intersection.equals(crease.vertex1)) {
+                intersection = crease.vertex1;
+            } else if (intersection.equals(crease.vertex2)) {
+                intersection = crease.vertex2;
+            }
         }
 
         if (intersection) {

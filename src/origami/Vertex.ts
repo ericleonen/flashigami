@@ -10,9 +10,6 @@ export default class Vertex extends Pair {
     static hoverRadius = 10;
     creases: OrigamiSet<Crease>;
 
-    mountains: number;
-    valleys: number;
-
     /**
      * Accepts numbers x and y and an optional OrigamiSet of Crease creases. Initializes a vertex at
      * (x, y). Initializes creases as the given OrigamiSet of Crease creases if given, otherwise as 
@@ -21,16 +18,6 @@ export default class Vertex extends Pair {
     constructor(x: number, y: number, creases?: OrigamiSet<Crease>) {
         super(x, y);
         this.creases = creases ? creases : new OrigamiSet();
-        this.mountains = 0;
-        this.valleys = 0;
-
-        this.creases.forEach(crease => {
-            if (crease.type === "mountain") {
-                this.mountains++;
-            } else if (crease.type === "valley") {
-                this.valleys++;
-            }
-        })
     }
 
     /**
@@ -45,12 +32,6 @@ export default class Vertex extends Pair {
      */
     addCrease(...creases: Crease[]) {
         creases.forEach(crease => {
-            if (crease.type === "mountain") {
-                this.mountains++;
-            } else if (crease.type === "valley") {
-                this.valleys++;
-            }
-
             this.creases.add(crease);
         });
     }
@@ -60,12 +41,6 @@ export default class Vertex extends Pair {
      */
     deleteCrease(...creases: Crease[]) {
         creases.forEach(crease => {
-            if (crease.type === "mountain") {
-                this.mountains--;
-            } else if (crease.type === "valley") {
-                this.valleys--;
-            }
-
             this.creases.delete(crease);
         });
     }
@@ -74,8 +49,19 @@ export default class Vertex extends Pair {
      * Returns true if Maekawa's theorem is satisfied by this vertex
      */
     checkMaekawa() {
-        return this.mountains + this.valleys === 0
-            || Math.abs(this.mountains - this.valleys) === 2;
+        let mountains = 0;
+        let valleys = 0;
+
+        this.creases.forEach(crease => {
+            if (crease.type === "mountain") {
+                mountains++;
+            } else if (crease.type === "valley") {
+                valleys++;
+            }
+        });
+
+        return mountains + valleys === 0
+            || Math.abs(mountains - valleys) === 2;
     }
 
     /**
@@ -96,8 +82,6 @@ export default class Vertex extends Pair {
         for (let i = 0; i < angles.length - 1; i += 2) {
             angleSum = angles[i + 1]! - angles[i]!;
         }
-
-        console.log(angleSum);
 
         return angleSum === Math.PI;
     }
